@@ -12,6 +12,7 @@ const footerLinks = [
   { label: 'סיפורי הצלחה', href: '/testimonials' },
   { label: 'צור קשר', href: '/contact' },
   { label: 'הצהרת נגישות', href: '/accessibility' },
+  { label: 'מדיניות פרטיות', href: '/privacy' },
 ]
 
 interface FooterProps {
