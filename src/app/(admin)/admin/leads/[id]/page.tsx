@@ -5,6 +5,8 @@ import { LeadActions } from './LeadActions'
 import type { Metadata } from 'next'
 import type { Lead, LeadNote } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'פרטי ליד | מימוש 360 ניהול',
   robots: { index: false, follow: false },

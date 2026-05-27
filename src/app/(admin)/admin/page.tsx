@@ -5,6 +5,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Lead, LeadStatus } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'לוח בקרה | מימוש 360 ניהול',
   robots: { index: false, follow: false },

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { ContentEditor } from './ContentEditor'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'סיפורי הצלחה | מימוש 360 ניהול',
   robots: { index: false, follow: false },

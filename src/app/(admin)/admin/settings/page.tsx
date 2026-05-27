@@ -4,6 +4,8 @@ import { AdminSettingsClient } from './AdminSettingsClient'
 import type { Metadata } from 'next'
 import type { Profile, AuditLog } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'הגדרות ניהול | מימוש 360',
   robots: { index: false, follow: false },
