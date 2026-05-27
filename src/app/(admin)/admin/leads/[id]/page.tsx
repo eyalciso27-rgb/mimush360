@@ -52,13 +52,20 @@ export default async function LeadDetailPage({ params }: LeadPageProps) {
               התקבל ב-{formatDate(lead.created_at)} · מקור: {lead.source}
             </p>
           </div>
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium shrink-0 ${
-              LEAD_STATUS_COLORS[lead.status] ?? 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            {LEAD_STATUS_LABELS[lead.status] ?? lead.status}
-          </span>
+          <div className="flex flex-col items-end gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium shrink-0 ${
+                LEAD_STATUS_COLORS[lead.status] ?? 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              {LEAD_STATUS_LABELS[lead.status] ?? lead.status}
+            </span>
+            {lead.archived_at && (
+              <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-amber-100 text-amber-700">
+                בארכיון
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -98,6 +105,18 @@ export default async function LeadDetailPage({ params }: LeadPageProps) {
               <dt className="text-gray-500 mb-0.5">מקור</dt>
               <dd className="font-medium text-gray-900 capitalize">{lead.source}</dd>
             </div>
+            {lead.last_contacted_at && (
+              <div>
+                <dt className="text-gray-500 mb-0.5">קשר אחרון</dt>
+                <dd className="font-medium text-gray-900">{formatDate(lead.last_contacted_at)}</dd>
+              </div>
+            )}
+            {lead.archived_at && (
+              <div>
+                <dt className="text-gray-500 mb-0.5">הועבר לארכיון</dt>
+                <dd className="font-medium text-amber-700">{formatDate(lead.archived_at)}</dd>
+              </div>
+            )}
           </dl>
         </div>
 

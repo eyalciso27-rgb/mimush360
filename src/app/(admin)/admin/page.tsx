@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Users, MessageSquare, TrendingUp, Star, Phone, MessageCircle } from 'lucide-react'
+import { Users, MessageSquare, Star, Phone, MessageCircle } from 'lucide-react'
 import { formatDate, LEAD_STATUS_LABELS, LEAD_STATUS_COLORS } from '@/lib/utils'
 import Link from 'next/link'
 import type { Metadata } from 'next'
@@ -17,15 +17,16 @@ async function getDashboardData() {
     const supabase = await createClient()
 
     const [leadsResult, recentLeadsResult] = await Promise.all([
-      supabase.from('leads').select('id, status, created_at'),
+      supabase.from('leads').select('id, status, created_at, archived_at').is('archived_at', null),
       supabase
         .from('leads')
         .select('id, full_name, phone, status, source, created_at')
+        .is('archived_at', null)
         .order('created_at', { ascending: false })
         .limit(8),
     ])
 
-    const allLeads = (leadsResult.data ?? []) as Pick<Lead, 'id' | 'status' | 'created_at'>[]
+    const allLeads = (leadsResult.data ?? []) as Pick<Lead, 'id' | 'status' | 'created_at' | 'archived_at'>[]
 
     const statusCounts = allLeads.reduce(
       (acc, lead) => {
@@ -48,12 +49,19 @@ async function getDashboardData() {
       (l) => new Date(l.created_at) >= sevenDaysAgo
     ).length
 
+    // Leads today
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const leadsToday = allLeads.filter(
+      (l) => new Date(l.created_at) >= startOfToday
+    ).length
+
     return {
       totalLeads: allLeads.length,
       newLeads: statusCounts['new'] ?? 0,
       convertedLeads: statusCounts['converted'] ?? 0,
       leadsThisMonth,
       leadsLastWeek,
+      leadsToday,
       statusCounts,
       recentLeads: (recentLeadsResult.data ?? []) as Pick<Lead, 'id' | 'full_name' | 'phone' | 'status' | 'source' | 'created_at'>[],
     }
@@ -64,6 +72,7 @@ async function getDashboardData() {
       convertedLeads: 0,
       leadsThisMonth: 0,
       leadsLastWeek: 0,
+      leadsToday: 0,
       statusCounts: {} as Record<LeadStatus, number>,
       recentLeads: [],
     }
@@ -79,6 +88,7 @@ export default async function AdminDashboardPage() {
     convertedLeads,
     leadsThisMonth,
     leadsLastWeek,
+    leadsToday,
     statusCounts,
     recentLeads,
   } = await getDashboardData()
@@ -105,12 +115,12 @@ export default async function AdminDashboardPage() {
       urgent: newLeads > 0,
     },
     {
-      label: 'החודש',
-      value: leadsThisMonth,
-      icon: TrendingUp,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
-      sub: 'פניות חדשות',
+      label: 'היום',
+      value: leadsToday,
+      icon: Phone,
+      color: 'text-cyan-600',
+      bg: 'bg-cyan-50',
+      sub: `${leadsThisMonth} החודש`,
     },
     {
       label: 'הפכו ללקוחות',

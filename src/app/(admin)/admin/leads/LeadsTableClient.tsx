@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { formatDate, LEAD_STATUS_LABELS, LEAD_STATUS_COLORS } from '@/lib/utils'
-import { Phone, MessageCircle, FileDown, ChevronDown, Loader2 } from 'lucide-react'
+import { Phone, MessageCircle, FileDown, ChevronDown, Loader2, Mail } from 'lucide-react'
 import type { Lead, LeadStatus } from '@/types'
 
-type LeadRow = Pick<Lead, 'id' | 'full_name' | 'phone' | 'email' | 'status' | 'source' | 'created_at'>
+type LeadRow = Pick<Lead, 'id' | 'full_name' | 'phone' | 'email' | 'status' | 'source' | 'created_at' | 'archived_at' | 'last_contacted_at'>
 
 interface LeadsTableClientProps {
   leads: LeadRow[]
@@ -100,7 +100,7 @@ function StatusBadge({
 }
 
 function exportToCSV(leads: LeadRow[]) {
-  const headers = ['שם', 'טלפון', 'אימייל', 'מקור', 'סטטוס', 'תאריך']
+  const headers = ['שם', 'טלפון', 'אימייל', 'מקור', 'סטטוס', 'תאריך', 'נוצר קשר לאחרונה']
   const rows = leads.map((l) => [
     l.full_name ?? '',
     l.phone ?? '',
@@ -108,6 +108,7 @@ function exportToCSV(leads: LeadRow[]) {
     l.source,
     LEAD_STATUS_LABELS[l.status] ?? l.status,
     new Date(l.created_at).toLocaleDateString('he-IL'),
+    l.last_contacted_at ? new Date(l.last_contacted_at).toLocaleDateString('he-IL') : '',
   ])
   const csv = [headers, ...rows]
     .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
@@ -176,9 +177,14 @@ export function LeadsTableClient({ leads: initialLeads, total }: LeadsTableClien
                       {lead.email}
                     </div>
                   )}
+                  {lead.last_contacted_at && (
+                    <div className="text-xs text-emerald-600 mt-0.5">
+                      קשר: {new Date(lead.last_contacted_at).toLocaleDateString('he-IL')}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     {lead.phone ? (
                       <>
                         <a
@@ -199,10 +205,23 @@ export function LeadsTableClient({ leads: initialLeads, total }: LeadsTableClien
                         >
                           <MessageCircle className="h-4 w-4" />
                         </a>
-                        <span className="text-gray-600 text-xs" dir="ltr">{lead.phone}</span>
                       </>
-                    ) : (
+                    ) : null}
+                    {lead.email && (
+                      <a
+                        href={`mailto:${lead.email}`}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                        title={`שלח מייל ל-${lead.email}`}
+                        aria-label={`שלח מייל ל-${lead.email}`}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </a>
+                    )}
+                    {!lead.phone && !lead.email && (
                       <span className="text-gray-400 text-xs">—</span>
+                    )}
+                    {lead.phone && (
+                      <span className="text-gray-600 text-xs mr-1" dir="ltr">{lead.phone}</span>
                     )}
                   </div>
                 </td>

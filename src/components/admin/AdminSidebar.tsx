@@ -7,12 +7,13 @@ import { createClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
   Users,
-  FileText,
   Settings,
   LogOut,
   Menu,
   X,
-  ChevronDown,
+  HelpCircle,
+  Globe,
+  Star,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Profile } from '@/types'
@@ -22,27 +23,12 @@ interface AdminSidebarProps {
 }
 
 const navItems = [
-  {
-    label: 'לוח בקרה',
-    href: '/admin',
-    icon: LayoutDashboard,
-    exact: true,
-  },
-  {
-    label: 'לידים',
-    href: '/admin/leads',
-    icon: Users,
-  },
-  {
-    label: 'סיפורי הצלחה',
-    href: '/admin/content',
-    icon: FileText,
-  },
-  {
-    label: 'הגדרות',
-    href: '/admin/settings',
-    icon: Settings,
-  },
+  { label: 'לוח בקרה', href: '/admin', icon: LayoutDashboard, exact: true },
+  { label: 'לידים', href: '/admin/leads', icon: Users },
+  { label: 'סיפורי הצלחה', href: '/admin/content', icon: Star },
+  { label: 'שאלות נפוצות', href: '/admin/faqs', icon: HelpCircle },
+  { label: 'עמודים ו-SEO', href: '/admin/pages', icon: Globe },
+  { label: 'הגדרות', href: '/admin/settings', icon: Settings },
 ]
 
 const ROLE_LABELS: Record<string, string> = {

@@ -3,6 +3,8 @@ import { HowItWorksSection } from '@/components/sections/HowItWorksSection'
 import { CTASection } from '@/components/sections/CTASection'
 import { CheckCircle } from 'lucide-react'
 import { getPublicSettings } from '@/lib/site-settings'
+import { createClient } from '@/lib/supabase/server'
+import type { FAQ } from '@/types'
 
 export const metadata: Metadata = {
   title: 'איך זה עובד | מימוש 360',
@@ -14,7 +16,7 @@ export const metadata: Metadata = {
   },
 }
 
-const faqs = [
+const FALLBACK_FAQS = [
   {
     q: 'כמה זמן לוקח התהליך?',
     a: 'התהליך תלוי בסוג הזכאות ובנסיבות האישיות. בממוצע, מדובר על כמה חודשים מרגע הגשת הבקשה ועד קבלת ההחלטה.',
@@ -37,8 +39,23 @@ const faqs = [
   },
 ]
 
+async function getPublicFAQs(): Promise<{ q: string; a: string }[]> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('faqs')
+      .select('question, answer')
+      .eq('is_published', true)
+      .order('display_order', { ascending: true })
+    if (!data || data.length === 0) return FALLBACK_FAQS
+    return (data as Pick<FAQ, 'question' | 'answer'>[]).map((f) => ({ q: f.question, a: f.answer }))
+  } catch {
+    return FALLBACK_FAQS
+  }
+}
+
 export default async function HowItWorksPage() {
-  const settings = await getPublicSettings()
+  const [settings, faqs] = await Promise.all([getPublicSettings(), getPublicFAQs()])
   return (
     <>
       {/* Hero */}

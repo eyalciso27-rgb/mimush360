@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { formatDate, LEAD_STATUS_LABELS, LEAD_STATUS_COLORS } from '@/lib/utils'
-import { Loader2, Plus, Edit2, Check, X, Phone, MessageCircle } from 'lucide-react'
+import { Loader2, Plus, Edit2, Check, X, Phone, MessageCircle, Mail, Archive, ArchiveRestore, PhoneCall } from 'lucide-react'
 import type { Lead, LeadNote, LeadStatus } from '@/types'
 
 interface LeadActionsProps {
@@ -30,6 +30,8 @@ export function LeadActions({ lead }: LeadActionsProps) {
   const [updatingStatus, setUpdatingStatus] = useState(false)
   const [addingNote, setAddingNote] = useState(false)
   const [notes, setNotes] = useState<LeadNote[]>(lead.lead_notes ?? [])
+  const [archiving, setArchiving] = useState(false)
+  const [markingContact, setMarkingContact] = useState(false)
 
   // Edit mode
   const [editing, setEditing] = useState(false)
@@ -50,9 +52,79 @@ export function LeadActions({ lead }: LeadActionsProps) {
     } else {
       setStatus(newStatus)
       toast.success('סטטוס עודכן')
+      // Audit log
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('audit_logs').insert({
+          user_id: user.id,
+          action: 'update_lead_status',
+          entity_type: 'lead',
+          entity_id: lead.id,
+          metadata: { from: status, to: newStatus },
+        })
+      }
       router.refresh()
     }
     setUpdatingStatus(false)
+  }
+
+  const markContacted = async () => {
+    setMarkingContact(true)
+    const now = new Date().toISOString()
+    const { error } = await supabase
+      .from('leads')
+      .update({ last_contacted_at: now, updated_at: now })
+      .eq('id', lead.id)
+
+    if (error) {
+      toast.error('שגיאה בעדכון')
+    } else {
+      toast.success('תאריך קשר עודכן')
+      // Audit log
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('audit_logs').insert({
+          user_id: user.id,
+          action: 'mark_lead_contacted',
+          entity_type: 'lead',
+          entity_id: lead.id,
+          metadata: { contacted_at: now },
+        })
+      }
+      router.refresh()
+    }
+    setMarkingContact(false)
+  }
+
+  const archiveLead = async () => {
+    if (!confirm(lead.archived_at ? 'לשחזר ליד מהארכיון?' : 'להעביר ליד לארכיון?')) return
+    setArchiving(true)
+    const now = new Date().toISOString()
+    const { error } = await supabase
+      .from('leads')
+      .update({
+        archived_at: lead.archived_at ? null : now,
+        updated_at: now,
+      })
+      .eq('id', lead.id)
+
+    if (error) {
+      toast.error('שגיאה בפעולה')
+    } else {
+      toast.success(lead.archived_at ? 'ליד שוחזר מהארכיון' : 'ליד הועבר לארכיון')
+      // Audit log
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('audit_logs').insert({
+          user_id: user.id,
+          action: lead.archived_at ? 'unarchive_lead' : 'archive_lead',
+          entity_type: 'lead',
+          entity_id: lead.id,
+        })
+      }
+      router.refresh()
+    }
+    setArchiving(false)
   }
 
   const saveEdit = async () => {
@@ -122,17 +194,19 @@ export function LeadActions({ lead }: LeadActionsProps) {
   return (
     <>
       {/* Quick Contact */}
-      {lead.phone && (
+      {(lead.phone || lead.email) && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <h2 className="font-semibold text-gray-900 mb-4">יצירת קשר מהירה</h2>
-          <div className="flex gap-3">
-            <a
-              href={`tel:${lead.phone.replace(/\D/g, '')}`}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              <Phone className="h-4 w-4" />
-              התקשר עכשיו
-            </a>
+          <div className="flex flex-wrap gap-3">
+            {lead.phone && (
+              <a
+                href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                <Phone className="h-4 w-4" />
+                התקשר עכשיו
+              </a>
+            )}
             {whatsappHref && (
               <a
                 href={whatsappHref}
@@ -144,6 +218,27 @@ export function LeadActions({ lead }: LeadActionsProps) {
                 שלח וואטסאפ
               </a>
             )}
+            {lead.email && (
+              <a
+                href={`mailto:${lead.email}`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                <Mail className="h-4 w-4" />
+                שלח מייל
+              </a>
+            )}
+            <button
+              onClick={markContacted}
+              disabled={markingContact}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-60 transition-colors"
+            >
+              {markingContact ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <PhoneCall className="h-4 w-4" />
+              )}
+              סמן כנוצר קשר
+            </button>
           </div>
         </div>
       )}
@@ -304,6 +399,34 @@ export function LeadActions({ lead }: LeadActionsProps) {
             ))}
           </ul>
         )}
+      </div>
+
+      {/* Archive */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <h2 className="font-semibold text-gray-900 mb-2">פעולות ניהוליות</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          {lead.archived_at
+            ? 'ליד זה נמצא בארכיון. ניתן לשחזר אותו.'
+            : 'העברה לארכיון תסיר את הליד מהרשימה הפעילה.'}
+        </p>
+        <button
+          onClick={archiveLead}
+          disabled={archiving}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-60 ${
+            lead.archived_at
+              ? 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+              : 'bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200'
+          }`}
+        >
+          {archiving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : lead.archived_at ? (
+            <ArchiveRestore className="h-4 w-4" />
+          ) : (
+            <Archive className="h-4 w-4" />
+          )}
+          {lead.archived_at ? 'שחזר מארכיון' : 'ארכב ליד'}
+        </button>
       </div>
     </>
   )

@@ -22,6 +22,7 @@ export interface Page {
   title: string
   content: Record<string, unknown>
   is_published: boolean
+  meta_description: string | null
   created_at: string
   updated_at: string
   updated_by: string | null
@@ -48,9 +49,21 @@ export interface Lead {
   status: LeadStatus
   typeform_response_id: string | null
   metadata: Record<string, unknown> | null
+  archived_at: string | null
+  last_contacted_at: string | null
   created_at: string
   updated_at: string
   lead_notes?: LeadNote[]
+}
+
+export interface FAQ {
+  id: string
+  question: string
+  answer: string
+  is_published: boolean
+  display_order: number
+  created_at: string
+  updated_at: string
 }
 
 export interface LeadNote {
@@ -114,6 +127,7 @@ export type Database = {
           title: string
           content?: Record<string, unknown>
           is_published?: boolean
+          meta_description?: string | null
           updated_by?: string | null
           created_at?: string
           updated_at?: string
@@ -124,7 +138,30 @@ export type Database = {
           title?: string
           content?: Record<string, unknown>
           is_published?: boolean
+          meta_description?: string | null
           updated_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      faqs: {
+        Row: FAQ
+        Insert: {
+          id?: string
+          question: string
+          answer: string
+          is_published?: boolean
+          display_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          question?: string
+          answer?: string
+          is_published?: boolean
+          display_order?: number
           created_at?: string
           updated_at?: string
         }
@@ -166,6 +203,8 @@ export type Database = {
           status?: LeadStatus
           typeform_response_id?: string | null
           metadata?: Record<string, unknown> | null
+          archived_at?: string | null
+          last_contacted_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -179,6 +218,8 @@ export type Database = {
           status?: LeadStatus
           typeform_response_id?: string | null
           metadata?: Record<string, unknown> | null
+          archived_at?: string | null
+          last_contacted_at?: string | null
           created_at?: string
           updated_at?: string
         }
