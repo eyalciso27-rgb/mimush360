@@ -11,6 +11,7 @@ const footerLinks = [
   { label: 'איך זה עובד', href: '/how-it-works' },
   { label: 'סיפורי הצלחה', href: '/testimonials' },
   { label: 'צור קשר', href: '/contact' },
+  { label: 'הצהרת נגישות', href: '/accessibility' },
 ]
 
 interface FooterProps {

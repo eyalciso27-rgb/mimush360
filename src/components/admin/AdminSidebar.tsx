@@ -37,27 +37,20 @@ const ROLE_LABELS: Record<string, string> = {
   viewer: 'צופה',
 }
 
-export function AdminSidebar({ profile }: AdminSidebarProps) {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
+// ─── Extracted outside to avoid re-creation on every render ───────────────
+interface SidebarNavProps {
+  profile: Profile | null
+  pathname: string
+  onNavigate: () => void
+  onSignOut: () => void
+  signingOut: boolean
+}
 
-  const supabase = createClient()
+function SidebarNav({ profile, pathname, onNavigate, onSignOut, signingOut }: SidebarNavProps) {
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? pathname === href : pathname.startsWith(href)
 
-  const handleSignOut = async () => {
-    setSigningOut(true)
-    await supabase.auth.signOut()
-    router.push('/admin/login')
-    router.refresh()
-  }
-
-  const isActive = (href: string, exact?: boolean) => {
-    if (exact) return pathname === href
-    return pathname.startsWith(href)
-  }
-
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-gray-200">
@@ -83,7 +76,7 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setMobileOpen(false)}
+              onClick={onNavigate}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 active
@@ -117,7 +110,7 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
           </div>
         )}
         <button
-          onClick={handleSignOut}
+          onClick={onSignOut}
           disabled={signingOut}
           className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
           aria-label="יציאה מהמערכת"
@@ -128,6 +121,23 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
       </div>
     </div>
   )
+}
+// ──────────────────────────────────────────────────────────────────────────
+
+export function AdminSidebar({ profile }: AdminSidebarProps) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+
+  const supabase = createClient()
+
+  const handleSignOut = async () => {
+    setSigningOut(true)
+    await supabase.auth.signOut()
+    router.push('/admin/login')
+    router.refresh()
+  }
 
   return (
     <>
@@ -136,7 +146,13 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
         className="hidden lg:flex flex-col w-64 bg-white border-l border-gray-200 h-screen sticky top-0 shrink-0"
         aria-label="תפריט ניהול"
       >
-        <SidebarContent />
+        <SidebarNav
+          profile={profile}
+          pathname={pathname}
+          onNavigate={() => setMobileOpen(false)}
+          onSignOut={handleSignOut}
+          signingOut={signingOut}
+        />
       </aside>
 
       {/* Mobile top bar */}
@@ -171,7 +187,13 @@ export function AdminSidebar({ profile }: AdminSidebarProps) {
             >
               <X className="h-5 w-5" />
             </button>
-            <SidebarContent />
+            <SidebarNav
+              profile={profile}
+              pathname={pathname}
+              onNavigate={() => setMobileOpen(false)}
+              onSignOut={handleSignOut}
+              signingOut={signingOut}
+            />
           </aside>
         </div>
       )}

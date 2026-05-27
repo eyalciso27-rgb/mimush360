@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getPageContent } from '@/lib/page-content'
 import { PageContentEditor } from './PageContentEditor'
@@ -48,9 +49,9 @@ export default async function PageContentEditorPage({ params }: Props) {
     <div>
       <div className="mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-          <a href="/admin/pages" className="hover:text-[#2D6A4F] transition-colors">
+          <Link href="/admin/pages" className="hover:text-[#2D6A4F] transition-colors">
             עמודים ו-SEO
-          </a>
+          </Link>
           <span>/</span>
           <span className="text-gray-900 font-medium">{pageName}</span>
         </div>

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { siteConfig, getWhatsAppUrl } from '@/lib/utils'
+import { siteConfig } from '@/lib/utils'
 import { ArrowLeft, Phone } from 'lucide-react'
 import type { PublicSettings } from '@/lib/site-settings'
 
@@ -17,10 +17,7 @@ export function CTASection({
   settings,
 }: CTASectionProps) {
   const phone = settings?.phone ?? siteConfig.phone
-  const whatsapp = settings?.whatsapp ?? siteConfig.whatsapp
-  const whatsappMessage = settings?.whatsappMessage ?? siteConfig.whatsappMessage
   const typeformId = settings?.typeformId ?? siteConfig.typeformId
-  const whatsappUrl = getWhatsAppUrl(whatsapp, whatsappMessage)
 
   const handleCTA = () => {
     const id = typeformId

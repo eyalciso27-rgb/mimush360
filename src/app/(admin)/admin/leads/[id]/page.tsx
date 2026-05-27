@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { formatDate, LEAD_STATUS_LABELS, LEAD_STATUS_COLORS } from '@/lib/utils'
@@ -37,12 +38,12 @@ export default async function LeadDetailPage({ params }: LeadPageProps) {
   return (
     <div className="max-w-3xl">
       <div className="mb-6">
-        <a
+        <Link
           href="/admin/leads"
           className="text-sm text-[#2D6A4F] hover:underline font-medium mb-3 inline-block"
         >
           ← חזרה ללידים
-        </a>
+        </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
