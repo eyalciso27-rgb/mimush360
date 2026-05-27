@@ -6,6 +6,7 @@ import { HowItWorksSection } from '@/components/sections/HowItWorksSection'
 import { CTASection } from '@/components/sections/CTASection'
 import { createClient } from '@/lib/supabase/server'
 import { getPublicSettings } from '@/lib/site-settings'
+import { getPageContent } from '@/lib/page-content'
 
 export const metadata: Metadata = {
   title: 'מימוש 360 | מימוש זכויות רפואיות מול ביטוח לאומי',
@@ -29,18 +30,23 @@ async function getTestimonials() {
 }
 
 export default async function HomePage() {
-  const [testimonials, settings] = await Promise.all([
+  const [testimonials, settings, homeContent] = await Promise.all([
     getTestimonials(),
     getPublicSettings(),
+    getPageContent('home'),
   ])
 
   return (
     <>
-      <Hero typeformId={settings.typeformId} settings={settings} />
-      <Features />
-      <HowItWorksSection />
+      <Hero typeformId={settings.typeformId} settings={settings} content={homeContent} />
+      <Features content={homeContent} />
+      <HowItWorksSection content={homeContent} />
       <TestimonialsSection testimonials={testimonials.length > 0 ? testimonials : undefined} />
-      <CTASection settings={settings} />
+      <CTASection
+        title={(homeContent.cta_title as string) ?? undefined}
+        subtitle={(homeContent.cta_subtitle as string) ?? undefined}
+        settings={settings}
+      />
     </>
   )
 }

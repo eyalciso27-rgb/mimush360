@@ -2,9 +2,11 @@
 import React, { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { Edit2, Check, X, Globe, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Edit2, Check, X, Globe, Eye, EyeOff, Loader2, FileEdit } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { Page } from '@/types'
+
+const CONTENT_EDITABLE_SLUGS = ['home', 'about', 'how-it-works', 'contact']
 
 interface PagesEditorProps {
   pages: Page[]
@@ -202,6 +204,17 @@ export function PagesEditor({ pages: initialPages }: PagesEditorProps) {
                     <div className="text-xs text-gray-400">
                       עודכן: {formatDate(page.updated_at)}
                     </div>
+                    {CONTENT_EDITABLE_SLUGS.includes(page.slug) && (
+                      <div className="mt-2">
+                        <a
+                          href={`/admin/pages/${page.slug}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-[#2D6A4F] hover:text-[#1B4332] bg-[#2D6A4F]/10 hover:bg-[#2D6A4F]/20 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <FileEdit className="h-3.5 w-3.5" />
+                          ערוך תוכן עמוד
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -219,10 +232,19 @@ export function PagesEditor({ pages: initialPages }: PagesEditorProps) {
                   <button
                     onClick={() => startEdit(page)}
                     className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                    title="ערוך"
+                    title="ערוך SEO"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
+                  {CONTENT_EDITABLE_SLUGS.includes(page.slug) && (
+                    <a
+                      href={`/admin/pages/${page.slug}`}
+                      className="p-2 rounded-lg text-[#2D6A4F] hover:bg-[#2D6A4F]/10 transition-colors"
+                      title="ערוך תוכן"
+                    >
+                      <FileEdit className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

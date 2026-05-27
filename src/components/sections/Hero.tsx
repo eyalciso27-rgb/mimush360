@@ -8,18 +8,31 @@ import type { PublicSettings } from '@/lib/site-settings'
 interface HeroProps {
   typeformId?: string
   settings?: PublicSettings
+  content?: Record<string, unknown>
 }
 
-const benefits = [
+const DEFAULT_BENEFITS = [
   'ייעוץ ראשוני ללא עלות',
   'ליווי אישי לאורך כל התהליך',
   'עשרות שנות ניסיון בתחום',
 ]
 
-export function Hero({ typeformId, settings }: HeroProps) {
+export function Hero({ typeformId, settings, content }: HeroProps) {
   const whatsapp = settings?.whatsapp ?? siteConfig.whatsapp
   const whatsappMessage = settings?.whatsappMessage ?? siteConfig.whatsappMessage
   const whatsappUrl = getWhatsAppUrl(whatsapp, whatsappMessage)
+
+  const hero = (content?.hero as Record<string, unknown> | undefined) ?? {}
+  const tag = (hero.tag as string) ?? 'ייעוץ ראשוני חינם'
+  const heading1 = (hero.heading_line1 as string) ?? 'מגיע לך יותר.'
+  const heading2 = (hero.heading_line2 as string) ?? 'אנחנו כאן כדי לדאוג'
+  const heading3 = (hero.heading_line3 as string) ?? 'שתקבל את זה.'
+  const headingHighlight = (hero.heading_highlight as string) ?? 'אנחנו כאן'
+  const subtitle =
+    (hero.subtitle as string) ??
+    'מימוש 360 מסייעת לכם לממש את הזכויות הרפואיות שמגיעות לכם מביטוח לאומי — בפשטות, בשקיפות, וללא בירוקרטיה מיותרת.'
+  const benefits = (hero.benefits as string[]) ?? DEFAULT_BENEFITS
+  const ctaPrimary = (hero.cta_primary as string) ?? 'בדקו אם מגיע לכם כסף'
 
   const handleCTA = () => {
     const id = typeformId ?? siteConfig.typeformId
@@ -57,7 +70,7 @@ export function Hero({ typeformId, settings }: HeroProps) {
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 bg-[#52B788] rounded-full animate-pulse" aria-hidden="true" />
             <span className="text-sm font-medium text-white/90">
-              ייעוץ ראשוני חינם
+              {tag}
             </span>
           </div>
 
@@ -66,17 +79,16 @@ export function Hero({ typeformId, settings }: HeroProps) {
             id="hero-heading"
             className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-6"
           >
-            מגיע לך יותר.
+            {heading1}
             <br />
-            <span className="text-[#B5860D]">אנחנו כאן</span> כדי לדאוג
+            <span className="text-[#B5860D]">{headingHighlight}</span>{heading2.replace(headingHighlight, '')}
             <br />
-            שתקבל את זה.
+            {heading3}
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl leading-relaxed">
-            מימוש 360 מסייעת לכם לממש את הזכויות הרפואיות שמגיעות לכם מביטוח
-            לאומי — בפשטות, בשקיפות, וללא בירוקרטיה מיותרת.
+            {subtitle}
           </p>
 
           {/* Benefits */}
@@ -102,7 +114,7 @@ export function Hero({ typeformId, settings }: HeroProps) {
               className="bg-[#B5860D] hover:bg-[#9A7010] text-white font-bold shadow-xl group"
               aria-label="בדקו אם מגיע לכם כסף - פתח שאלון"
             >
-              <span>בדקו אם מגיע לכם כסף</span>
+              <span>{ctaPrimary}</span>
               <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" aria-hidden="true" />
             </Button>
 

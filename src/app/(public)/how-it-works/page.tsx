@@ -5,6 +5,7 @@ import { CheckCircle } from 'lucide-react'
 import { getPublicSettings } from '@/lib/site-settings'
 import { createClient } from '@/lib/supabase/server'
 import type { FAQ } from '@/types'
+import { getPageContent } from '@/lib/page-content'
 
 export const metadata: Metadata = {
   title: 'איך זה עובד | מימוש 360',
@@ -54,8 +55,39 @@ async function getPublicFAQs(): Promise<{ q: string; a: string }[]> {
   }
 }
 
+const DEFAULT_SERVICES = [
+  'בדיקת זכאות מקיפה ויסודית',
+  'איסוף וארגון כל המסמכים הנדרשים',
+  'הגשת הבקשות לביטוח לאומי',
+  'מעקב שוטף אחר מצב התיק',
+  'ניהול תקשורת מול הגופים הרלוונטיים',
+  'ייצוג בערעורים במקרה הצורך',
+  'עדכון שוטף לגבי מצב התיק',
+  'ליווי עד לקבלת הכסף בפועל',
+]
+
 export default async function HowItWorksPage() {
-  const [settings, faqs] = await Promise.all([getPublicSettings(), getPublicFAQs()])
+  const [settings, faqs, howContent] = await Promise.all([
+    getPublicSettings(),
+    getPublicFAQs(),
+    getPageContent('how-it-works'),
+  ])
+
+  const heroTag = (howContent.hero_tag as string) ?? 'פשוט מתמיד'
+  const heroHeading = (howContent.hero_heading as string) ?? 'איך זה עובד?'
+  const heroSubtitle =
+    (howContent.hero_subtitle as string) ??
+    'אנחנו הפכנו תהליך מורכב לפשוט. כל מה שאתם צריכים לעשות הוא לפנות אלינו — אנחנו נדאג לכל השאר.'
+  const servicesHeading = (howContent.services_heading as string) ?? 'מה אנחנו מטפלים בו עבורכם'
+  const servicesSubtitle =
+    (howContent.services_subtitle as string) ??
+    'אתם לא צריכים להבין את הבירוקרטיה. זה בדיוק מה שאנחנו כאן בשבילו.'
+  const services = (howContent.services as string[]) ?? DEFAULT_SERVICES
+  const ctaTitle = (howContent.cta_title as string) ?? 'מוכנים להתחיל?'
+  const ctaSubtitle =
+    (howContent.cta_subtitle as string) ??
+    'השלב הראשון הוא פשוט — צרו איתנו קשר ונבדוק יחד מה מגיע לכם.'
+
   return (
     <>
       {/* Hero */}
@@ -63,20 +95,19 @@ export default async function HowItWorksPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-6 text-sm font-medium">
-              פשוט מתמיד
+              {heroTag}
             </div>
             <h1 className="text-4xl md:text-5xl font-black mb-6">
-              איך זה עובד?
+              {heroHeading}
             </h1>
             <p className="text-lg text-white/80 max-w-2xl leading-relaxed">
-              אנחנו הפכנו תהליך מורכב לפשוט. כל מה שאתם צריכים לעשות הוא
-              לפנות אלינו — אנחנו נדאג לכל השאר.
+              {heroSubtitle}
             </p>
           </div>
         </div>
       </section>
 
-      <HowItWorksSection />
+      <HowItWorksSection content={howContent} />
 
       {/* What we handle */}
       <section className="py-20 bg-[#FAFAF8]">
@@ -84,23 +115,13 @@ export default async function HowItWorksPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div>
               <h2 className="text-3xl font-black text-gray-900 mb-6">
-                מה אנחנו מטפלים בו עבורכם
+                {servicesHeading}
               </h2>
               <p className="text-gray-600 mb-6">
-                אתם לא צריכים להבין את הבירוקרטיה. זה בדיוק מה שאנחנו כאן
-                בשבילו.
+                {servicesSubtitle}
               </p>
               <ul className="space-y-3">
-                {[
-                  'בדיקת זכאות מקיפה ויסודית',
-                  'איסוף וארגון כל המסמכים הנדרשים',
-                  'הגשת הבקשות לביטוח לאומי',
-                  'מעקב שוטף אחר מצב התיק',
-                  'ניהול תקשורת מול הגופים הרלוונטיים',
-                  'ייצוג בערעורים במקרה הצורך',
-                  'עדכון שוטף לגבי מצב התיק',
-                  'ליווי עד לקבלת הכסף בפועל',
-                ].map((item) => (
+                {services.map((item) => (
                   <li key={item} className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-[#2D6A4F] shrink-0" aria-hidden="true" />
                     <span className="text-gray-700">{item}</span>
@@ -135,11 +156,7 @@ export default async function HowItWorksPage() {
         </div>
       </section>
 
-      <CTASection
-        title="מוכנים להתחיל?"
-        subtitle="השלב הראשון הוא פשוט — צרו איתנו קשר ונבדוק יחד מה מגיע לכם."
-        settings={settings}
-      />
+      <CTASection title={ctaTitle} subtitle={ctaSubtitle} settings={settings} />
     </>
   )
 }

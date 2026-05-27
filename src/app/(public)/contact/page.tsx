@@ -3,6 +3,7 @@ import { ContactForm } from '@/components/sections/ContactForm'
 import { Phone, Mail, MessageCircle } from 'lucide-react'
 import { getWhatsAppUrl } from '@/lib/utils'
 import { getPublicSettings } from '@/lib/site-settings'
+import { getPageContent } from '@/lib/page-content'
 
 export const metadata: Metadata = {
   title: 'צור קשר | מימוש 360',
@@ -14,7 +15,17 @@ export const metadata: Metadata = {
 }
 
 export default async function ContactPage() {
-  const settings = await getPublicSettings()
+  const [settings, contactContent] = await Promise.all([
+    getPublicSettings(),
+    getPageContent('contact'),
+  ])
+
+  const heroTag = (contactContent.hero_tag as string) ?? 'נשמח לעזור'
+  const heroHeading = (contactContent.hero_heading as string) ?? 'צרו איתנו קשר'
+  const heroSubtitle =
+    (contactContent.hero_subtitle as string) ??
+    'מלאו את הטופס ואנחנו נחזור אליכם בהקדם האפשרי — בדרך כלל תוך יום עסקים.'
+  const formTitle = (contactContent.form_title as string) ?? 'שלחו לנו הודעה'
 
   const contactMethods = [
     {
@@ -54,12 +65,11 @@ export default async function ContactPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-6 text-sm font-medium">
-              ייעוץ ראשוני חינם
+              {heroTag}
             </div>
-            <h1 className="text-4xl md:text-5xl font-black mb-6">צרו קשר</h1>
+            <h1 className="text-4xl md:text-5xl font-black mb-6">{heroHeading}</h1>
             <p className="text-lg text-white/80 max-w-2xl leading-relaxed">
-              יש לכם שאלות? רוצים לדעת אם מגיע לכם משהו? פנו אלינו —
-              הייעוץ הראשוני הוא חינם לחלוטין.
+              {heroSubtitle}
             </p>
           </div>
         </div>
@@ -126,7 +136,7 @@ export default async function ContactPage() {
 
             {/* Contact Form */}
             <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">השאירו פרטים</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">{formTitle}</h2>
               <ContactForm />
             </div>
           </div>

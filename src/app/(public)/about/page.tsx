@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { CTASection } from '@/components/sections/CTASection'
 import { CheckCircle, Target, Heart, Users2 } from 'lucide-react'
 import { getPublicSettings } from '@/lib/site-settings'
+import { getPageContent } from '@/lib/page-content'
 
 export const metadata: Metadata = {
   title: 'אודות מימוש 360',
@@ -14,26 +15,61 @@ export const metadata: Metadata = {
   },
 }
 
-const values = [
+const VALUE_ICONS = [Heart, Target, Users2]
+
+const DEFAULT_VALUES = [
   {
-    icon: Heart,
     title: 'אנושיות',
     description: 'כל לקוח הוא אדם עם סיפור ייחודי. אנחנו מקשיבים, מבינים ופועלים מתוך אמפתיה אמיתית.',
   },
   {
-    icon: Target,
     title: 'מיקוד בתוצאות',
     description: 'אנחנו לא עוצרים עד שהלקוח מקבל את מה שמגיע לו. תוצאות הן המדד היחיד להצלחה שלנו.',
   },
   {
-    icon: Users2,
     title: 'שקיפות מלאה',
     description: 'אין עלויות נסתרות, אין הפתעות. הלקוח יודע בכל רגע מה קורה ומה הצפוי.',
   },
 ]
 
+const DEFAULT_STATS = [
+  'מאות לקוחות מרוצים',
+  'ניסיון רב שנים בתחום',
+  'שיעור הצלחה גבוה',
+  'ליווי עד לסגירת התיק',
+  'זמינות מלאה ומענה מהיר',
+]
+
+const DEFAULT_STORY_PARAGRAPHS = [
+  'מימוש 360 נוסדה על ידי אנשי מקצוע עם ניסיון רב שנים בתחום הזכויות הרפואיות מול ביטוח לאומי. ראינו מקרוב כיצד אנשים מפסידים כסף ומגיע להם רק בשל חוסר ידע, עייפות מבירוקרטיה או פשוט חוסר זמן.',
+  'הבנו שאנחנו יכולים לשנות את המצב — להיות הגשר בין האדם לבין מה שמגיע לו. לקחת על עצמנו את ההתנהלות הקשה, ולאפשר ללקוחות להתמקד בהחלמה ובחיים שלהם.',
+  'היום, לאחר מאות מקרים מוצלחים, אנחנו ממשיכים עם אותה מחויבות: כל לקוח מקבל ליווי אישי, שקוף ויסודי — מהרגע הראשון ועד הרגע שבו הכסף מגיע אליו.',
+]
+
 export default async function AboutPage() {
-  const settings = await getPublicSettings()
+  const [settings, aboutContent] = await Promise.all([
+    getPublicSettings(),
+    getPageContent('about'),
+  ])
+
+  const heroTag = (aboutContent.hero_tag as string) ?? 'הסיפור שלנו'
+  const heroHeading = (aboutContent.hero_heading as string) ?? 'אנחנו מאמינים שכל אדם'
+  const heroHighlight = (aboutContent.hero_heading_highlight as string) ?? 'ראוי לקבל מה שמגיע לו'
+  const heroSubtitle =
+    (aboutContent.hero_subtitle as string) ??
+    'מימוש 360 נוסדה מתוך אמונה פשוטה: הבירוקרטיה של ביטוח לאומי לא צריכה לעמוד בין אנשים לבין הזכויות שמגיעות להם.'
+  const storyHeading = (aboutContent.story_heading as string) ?? 'הדרך שהביאה אותנו לכאן'
+  const storyParagraphs = (aboutContent.story_paragraphs as string[]) ?? DEFAULT_STORY_PARAGRAPHS
+  const stats = (aboutContent.stats as string[]) ?? DEFAULT_STATS
+  const valuesHeading = (aboutContent.values_heading as string) ?? 'הערכים שמנחים אותנו'
+  const valuesSubtitle =
+    (aboutContent.values_subtitle as string) ?? 'לא רק מקצועיות — גם אנושיות. זה מה שמבדיל אותנו.'
+  const valuesRaw = aboutContent.values as Array<{ title: string; description: string }> | undefined
+  const values = valuesRaw ?? DEFAULT_VALUES
+  const ctaTitle = (aboutContent.cta_title as string) ?? 'רוצים לדעת עוד? נשמח לדבר'
+  const ctaSubtitle =
+    (aboutContent.cta_subtitle as string) ?? 'צרו איתנו קשר לשיחה ראשונית — ללא עלות, ללא התחייבות.'
+
   return (
     <>
       {/* Hero */}
@@ -41,16 +77,15 @@ export default async function AboutPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 mb-6 text-sm font-medium">
-              הסיפור שלנו
+              {heroTag}
             </div>
             <h1 className="text-4xl md:text-5xl font-black mb-6">
-              אנחנו מאמינים שכל אדם
+              {heroHeading}
               <br />
-              <span className="text-[#B5860D]">ראוי לקבל מה שמגיע לו</span>
+              <span className="text-[#B5860D]">{heroHighlight}</span>
             </h1>
             <p className="text-lg text-white/80 leading-relaxed max-w-2xl">
-              מימוש 360 נוסדה מתוך אמונה פשוטה: הבירוקרטיה של ביטוח לאומי
-              לא צריכה לעמוד בין אנשים לבין הזכויות שמגיעות להם.
+              {heroSubtitle}
             </p>
           </div>
         </div>
@@ -62,25 +97,12 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-black text-gray-900 mb-6">
-                הדרך שהביאה אותנו לכאן
+                {storyHeading}
               </h2>
               <div className="space-y-4 text-gray-700 leading-relaxed">
-                <p>
-                  מימוש 360 נוסדה על ידי אנשי מקצוע עם ניסיון רב שנים בתחום
-                  הזכויות הרפואיות מול ביטוח לאומי. ראינו מקרוב כיצד אנשים
-                  מפסידים כסף ומגיע להם רק בשל חוסר ידע, עייפות מבירוקרטיה
-                  או פשוט חוסר זמן.
-                </p>
-                <p>
-                  הבנו שאנחנו יכולים לשנות את המצב — להיות הגשר בין האדם
-                  לבין מה שמגיע לו. לקחת על עצמנו את ההתנהלות הקשה, ולאפשר
-                  ללקוחות להתמקד בהחלמה ובחיים שלהם.
-                </p>
-                <p>
-                  היום, לאחר מאות מקרים מוצלחים, אנחנו ממשיכים עם אותה
-                  מחויבות: כל לקוח מקבל ליווי אישי, שקוף ויסודי — מהרגע
-                  הראשון ועד הרגע שבו הכסף מגיע אליו.
-                </p>
+                {storyParagraphs.map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
               </div>
             </div>
 
@@ -98,13 +120,7 @@ export default async function AboutPage() {
               </div>
 
               <ul className="space-y-3">
-                {[
-                  'מאות לקוחות מרוצים',
-                  'ניסיון רב שנים בתחום',
-                  'שיעור הצלחה גבוה',
-                  'ליווי עד לסגירת התיק',
-                  'זמינות מלאה ומענה מהיר',
-                ].map((item) => (
+                {stats.map((item) => (
                   <li key={item} className="flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-[#2D6A4F] shrink-0" aria-hidden="true" />
                     <span className="text-gray-700 font-medium">{item}</span>
@@ -121,15 +137,15 @@ export default async function AboutPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-12">
             <h2 id="values-heading" className="text-3xl font-black text-gray-900 mb-4">
-              הערכים שמנחים אותנו
+              {valuesHeading}
             </h2>
             <p className="text-gray-600 max-w-xl mx-auto">
-              לא רק מקצועיות — גם אנושיות. זה מה שמבדיל אותנו.
+              {valuesSubtitle}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map((value) => {
-              const Icon = value.icon
+            {values.map((value, index) => {
+              const Icon = VALUE_ICONS[index % VALUE_ICONS.length]
               return (
                 <article
                   key={value.title}
@@ -147,11 +163,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      <CTASection
-        title="רוצים לדעת עוד? נשמח לדבר"
-        subtitle="צרו איתנו קשר לשיחה ראשונית — ללא עלות, ללא התחייבות."
-        settings={settings}
-      />
+      <CTASection title={ctaTitle} subtitle={ctaSubtitle} settings={settings} />
     </>
   )
 }
